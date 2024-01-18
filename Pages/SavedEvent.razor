@@ -1,0 +1,88 @@
+﻿@page "/saved"
+
+<!-- ATusing MauiApp3.Services -->
+@using MauiApp3.Data
+<!-- ATinject ProductService prodService -->
+@inject NavigationManager navigationManager
+
+<body>
+
+    <h3>Saved Events</h3>
+
+    <!--<button class="btn btn-primary">Save Event</button>-->
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>I.D.</th>
+				<th>Name</th>
+				<th>Type</th>
+				<th>Location</th>
+				<th>Date</th>
+				<th>Qty</th>
+				<th>Price</th>
+				<th>Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var e in usersavedevent)
+			{
+				<tr>
+					<td>@e.eventId</td>
+					<td>@e.eventName</td>
+					<td>@e.eventType</td>
+					<td>@e.eventLocation</td>
+					<td>@e.eventDate</td>
+					<td>@e.eventQty</td>
+					<td>@e.eventPrice</td>
+					<td>
+						<button class="btn btn-info" @onclick="BookSavedEvent">Book</button> <!--Redirects to payment page-->
+						<button class="btn btn-info" @onclick="DeleteSavedEvent">Delete</button> <!--Deleted it from the database-->
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+
+
+
+</body>
+
+
+@code {
+	EventManagement em = new EventManagement();
+	Connection connect = new Connection();
+	User user = new User();
+	List<Event> events = Connection.GetEvents();
+	List<Event> matchingEvents = EventManagement.GetMatchingEvents();
+	List<User> usersavedevent = Connection.GetUserSave();
+
+	/*
+	string eventlocation;
+	string eventtype;
+	string eventdate;
+	string eventdetails;
+	*/
+
+	string eventId;
+	string eventName;
+	string eventAddress;
+	string eventType;
+	string eventDate;
+	int eventQty;
+	int eventPrice;
+
+
+
+	public void BookSavedEvent()
+	{
+		navigationManager.NavigateTo("event");
+	}	
+
+	public void DeleteSavedEvent()
+	{
+		Connection c = new Connection();
+		c.DeleteSavedFromDatabase(eventId);
+	}
+
+
+}

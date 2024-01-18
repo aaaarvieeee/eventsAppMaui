@@ -1,0 +1,228 @@
+﻿@page "/event"
+@using MauiApp3.Data;
+@using System.Text;
+@using System.Diagnostics;
+@using System;
+@using MySqlConnector;
+@inject NavigationManager navigationManager
+
+@inject NavigationManager navigationManager
+
+<body>
+
+    <h3>Events</h3>
+    <div class="row">
+        <div>
+            <select @onchange="showLocation">
+                <option>Location</option>
+                <option>Any</option>
+                @foreach(var x in events)
+                {
+                    <option value="@x.EventAddress">@x.EventAddress</option>
+                }
+            </select>
+        </div>
+        <div>
+            <select @onchange="showEventType">
+                <option>Type</option>
+                <option>Any</option>
+                @foreach(var y in events)
+                {
+                    <option value="@y.EventType">@y.EventType</option>
+                }
+            </select>
+        </div>
+        <div>
+            <select @onchange="showEventDate">
+                <option>Date</option>
+                <option>Any</option>
+                @foreach(var z in events)
+                {
+                    <option value="@z.EventDate">@z.EventDate</option>
+                }
+            </select>
+        </div> 
+        <div>
+            <button @onclick="FindEvents">Find Events</button>
+        </div>
+    </div>
+
+    <h3>Events</h3>
+    <select class="meh" @onchange="ShowEventDetails">
+        <option disabled selected>Loading</option>
+        @foreach(var a in matchingEvents)
+        {
+            <option>@a.EventID, @a.EventName, @a.EventAddress, @a.EventType, @a.EventDate, @a.EventQty, @a.EventPrice</option>
+        }
+    </select>
+
+    <h3>Reserve</h3>
+    <div class="column">
+
+        <label for="input2">Event Code</label>
+        <input type="text" placeholder="Event ID" @bind-value="@eventid" readonly>
+
+        <label for="input2">Location</label>
+        <input type="text"  placeholder="Event Location" value="@eventLocation" readonly>
+
+        <label for="input2">Type</label>
+        <input type="text" placeholder="Event Type" value="@eventType" readonly>
+
+        <label for="input2">Date</label>
+        <input type="text" placeholder="Event Date" value="@eventDate" readonly>
+
+        <label for="input2">Name</label>
+        <input type="text" placeholder="Event Name" value="@eventName" readonly>
+
+        <label for="input2">Qty</label>
+        <input type="text" placeholder="Ticket Quantity" value="@eventQty" readonly>
+
+        <label for="input2">Price</label>
+        <input type="text" placeholder="$100" value="@eventPrice" readonly>
+
+    </div>
+
+
+  <div class="container">
+        <div class="row">
+            <div class="col">
+                <button @onclick="bookingEventToDatabase" type="submit">Booking</button>
+            </div>
+            <div class="col">
+                <button @onclick="savedEventToDatabase" type="submit">Save</button>
+            </div>
+        </div>
+  </div>
+
+</body>
+
+
+@code {
+    EventManagement em = new EventManagement();
+    Connection connect = new Connection();
+    User user = new User();
+    List<Event> events = Connection.GetEvents();
+    List<Event> matchingEvents = EventManagement.GetMatchingEvents();
+    List<User> userbookevent = Connection.GetUsersBook();
+    List<User> usersavedevent = Connection.GetUserSave();
+
+
+    string eventName; //Added
+    string eventlocation;
+    string eventtype;
+    string eventdate;
+    string eventdetails;
+
+
+    string eventName;
+    int eventPrice;
+    int eventQty;
+    string eventid;
+    string eventLocation;
+    string eventType;
+    string eventDate;
+
+    string bookingNum;
+    string accountNum;
+    string savednum;
+
+
+    double eventCost;
+
+    private void showLocation(ChangeEventArgs x) => eventlocation = x.Value.ToString();
+    private void showEventType(ChangeEventArgs y) => eventtype = y.Value.ToString();
+    private void showEventDate(ChangeEventArgs z) => eventdate = z.Value.ToString();
+    private void showaccountNum(ChangeEventArgs a) => accountNum = a.Value.ToString();
+
+
+    private void FindEvents()
+    {
+        matchingEvents.Clear();
+        foreach(Event a in events)
+        {
+            if (eventlocation == "Any" & eventtype == "Any" & eventdate == "Any")
+            {
+                matchingEvents.Add(a);
+            }
+            else if (eventlocation == a.EventAddress & eventtype == a.EventType & eventdate == a.EventDate)
+            {
+                matchingEvents.Add(a);
+            }
+            else if (eventlocation == a.EventAddress & eventtype == a.EventType & eventdate == "Any")
+            {
+                matchingEvents.Add(a);
+            }
+            else if (eventlocation == a.EventAddress & eventtype == a.EventType & eventdate == a.EventDate)
+            {
+                matchingEvents.Add(a);
+            }
+            else if (eventlocation == "Any" & eventtype == a.EventType & eventdate == "Any")
+            {
+                matchingEvents.Add(a);
+            }
+            else if (eventlocation == a.EventAddress & eventtype == "Any" & eventdate == "Any")
+            {
+                matchingEvents.Add(a);
+            }
+
+        }
+    }
+
+    private void ShowEventDetails(ChangeEventArgs daddy)
+    {
+        eventdetails = daddy.Value.ToString();
+        string[] fields = eventdetails.Split(',');
+        foreach (string line in fields)
+        {
+            eventid = fields[0];
+            eventName = fields[1];
+            eventLocation = fields[2];
+            eventType = fields[3];
+            eventDate = fields[4];
+            eventQty = Convert.ToInt32(fields[5]);
+            eventPrice = Convert.ToInt32(fields[6]);
+        }
+    }
+
+    private void bookingEventToDatabase()
+    {
+        navigationManager.NavigateTo("payment");
+    }
+    
+    private async void savedEventToDatabase()
+    {
+        try
+        {
+            bool isBooked = false;
+
+            foreach (User x in usersavedevent)
+            {
+                if (x.eventId == eventid && x.accountNum == accountNum)
+                {
+                    bookingNum = null;
+                    isBooked = true;
+                    break;
+                }
+            }
+
+            if (isBooked)
+            {
+                throw new UserException("Already Saved");
+            }
+            else
+            {
+                //bookingNum = user.GenerateBookingNum(); //Not required?
+                savednum = User.GenerateRandomSaveCode();
+                connect.savedDatabase(eventid, savednum);
+            }
+        }
+        catch (UserException ex)
+        {
+            UserException myClass = new UserException();
+            await myClass.ShowAlert("Error", ex.Message, "OK");
+        }
+    }
+
+
+
+}

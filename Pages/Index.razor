@@ -1,0 +1,24 @@
+﻿@page "/"
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyApp.MainPage"
+             Title="Home">
+    
+    <StackLayout Padding="20">
+        <Label Text="Hello, world!" FontSize="Large" FontAttributes="Bold" />
+        <Label Text="Welcome to the Event Manager System." />
+        <BoxView HeightRequest="10" Color="Gray" Margin="0,20,0,20" />
+        <Label Text="How is Blazor working for you?" FontSize="Medium" FontAttributes="Bold" />
+        <SurveyPrompt Title="Take the survey" />
+        <WebView Source="https://www.google.com" HeightRequest="500">
+            <WebView.Style>
+                <Style TargetType="WebView">
+                    <Setter Property="BackgroundColor" Value="White" />
+                    <Setter Property="Margin" Value="0,20,0,0" />
+                </Style>
+            </WebView.Style>
+        </WebView>
+    </StackLayout>
+
+</ContentPage>

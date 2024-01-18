@@ -1,0 +1,167 @@
+﻿@page "/account"
+@using MauiApp3.Data
+@using System.Text;
+@using System.Diagnostics;
+
+<body>
+    <h3>Account Management</h3>
+
+    <div class="column">
+
+        <label for="input2">First Name</label>
+        <input type="text" placeholder="Enter First Name" @bind-value="@FirstName">
+
+        <label for="input2">Last Name</label>
+        <input type="text" placeholder="Enter Last Name" @bind-value="@LastName">
+
+        <label for="input7">Email</label>
+        <input type="text" id="input" placeholder="Enter Email Address" @bind-value="@Email">
+
+        <label for="input7">Date Of Birth</label>
+        <input type="datetime" id="input" placeholder="DD/MM/YYYY" @bind-value="@DOB">
+
+        <label for="input7">Phone Number</label>
+        <input type="text" id="input" placeholder="XXX-XXX-XXXX" @bind-value="@Phone">
+
+        <label for="input2">Username</label>
+        <input type="text" placeholder="Enter Username" @bind-value="@Username">
+
+        <label for="input6">Password</label>
+        <input type="password" id="input" @bind-value="@Password">
+
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <button type="submit">Update</button>
+            </div>
+            <div class="col">
+                <button @onclick="CreateAccount" type="submit">Create Account</button>
+            </div>
+            <div class="col">
+                <span value="reserveCode">Account Number: @AccountCode</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+
+@code {
+    string FirstName;
+    string LastName;
+    string Email;
+    string DOB;
+    string Phone;
+    string Username;
+    string Password;
+    int AccountCode;
+
+    private async void CreateAccount()
+    {
+        string ValidatedFirstName;
+        string ValidatedLastName;
+        string ValidatedEmail;
+        string ValidatedDOB;
+        string ValidatedPhone;
+        string ValidatedUsername;
+        string ValidatedPassword;
+
+
+        try
+        {
+            while(true)
+            {
+
+
+                if (!string.IsNullOrWhiteSpace(FirstName) || !string.IsNullOrWhiteSpace(LastName))
+                {
+                    ValidatedFirstName = FirstName;
+                    ValidatedLastName = LastName;
+                }
+                else
+                {
+                    throw new NameLeftEmptyException("One or more of the name fields are empty!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(Email))
+                {
+                    ValidatedEmail = Email;
+                }
+                else
+                {
+                    throw new EmailLeftEmptyException("Email Address field is left empty!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(DOB))
+                {
+                    ValidatedDOB = DOB;
+                }
+                else
+                {
+                    throw new DOBLeftEmptyException("Date of Birth field is left empty!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(Phone))
+                {
+                    ValidatedPhone = Phone;
+                }
+                else
+                {
+                    throw new PhoneLeftEmptyException("Phone Number field is left empty!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(Username))
+                {
+                    ValidatedUsername = Username;
+                }
+                else
+                {
+                    throw new UsernameLeftEmptyException("Username field is left empty!");
+                }
+
+                if (!string.IsNullOrWhiteSpace(Password))
+                {
+                    ValidatedPassword = Password;
+                }
+                else
+                {
+                    throw new PasswordLeftEmptyException("Password field is left empty!");
+                }
+                if (!string.IsNullOrWhiteSpace(FirstName) & !string.IsNullOrWhiteSpace(LastName) & !string.IsNullOrWhiteSpace(Email) & !string.IsNullOrWhiteSpace(DOB) & !string.IsNullOrWhiteSpace(Phone) & !string.IsNullOrWhiteSpace(Username) & !string.IsNullOrWhiteSpace(Password))
+                {
+
+                    AccountCode = Convert.ToInt32(AccountManager.GenerateRandomAccountCode());
+                    Connection.AddNewAccount(AccountCode, ValidatedUsername, ValidatedPassword, ValidatedEmail, ValidatedFirstName, ValidatedLastName, ValidatedPhone, ValidatedDOB);
+                    break;
+                }
+
+            }
+        }
+        catch(NameLeftEmptyException n)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{n.Message}", "OK");
+        }
+        catch(EmailLeftEmptyException e)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{e.Message}", "OK");
+        }
+        catch(PhoneLeftEmptyException p)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{p.Message}", "OK");
+        }
+        catch(DOBLeftEmptyException d)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{d.Message}", "OK");
+        }
+        catch(UsernameLeftEmptyException u)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{u.Message}", "OK");
+        }
+        catch(PasswordLeftEmptyException pw)
+        {
+            await App.Current.MainPage.DisplayAlert("Error", $"{pw.Message}", "OK");
+        }
+    }
+}

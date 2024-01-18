@@ -1,0 +1,84 @@
+﻿@page "/payment"
+
+@using MauiApp3.Data
+@inject NavigationManager navigationManager
+
+<h3>Payment</h3>
+
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">Event ID:</label>
+            <input type="text" @bind="eventid" class="form-control" placeholder="Event ID" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Account Number:</label>
+            <input type="text" @bind="accountNum" class="form-control" placeholder="Account Number" />
+        </div>
+        <div class="row">
+            <button type="submit" class="btn btn-sm btn-success" @onclick="AddBooking">Submit</button>
+            <button type="submit" class="btn btn-sm btn-info" @onclick="BackToEvents">Back</button>
+        </div>
+        <div class="col">
+            <span value="reserveCode">Booking #: @bookingNum</span>
+        </div>
+    </div>
+</div>
+
+
+
+
+@code {
+    EventManagement em = new EventManagement();
+    Connection connect = new Connection();
+    User user = new User();
+    List<Event> events = Connection.GetEvents();
+    List<Event> matchingEvents = EventManagement.GetMatchingEvents();
+    List<User> userbookevent = Connection.GetUsersBook();
+    List<User> usersavedevent = Connection.GetUserSave();
+
+    private string accountNum = "";
+    private string eventName = "";
+    private string bookingNum;
+    private string eventid = "";
+
+
+    public async void AddBooking()
+    {
+        try
+        {
+            bool isBooked = false;
+
+            foreach (User x in userbookevent)
+            {
+                if (x.eventId == eventid && x.accountNum == accountNum)
+                {
+                    bookingNum = null;
+                    isBooked = true;
+                    break;
+                }
+            }
+
+            if (isBooked)
+            {
+                throw new UserException("Already Booked");
+            }
+            else
+            {
+                bookingNum = user.GenerateBookingNum();
+                connect.bookedDatabase(bookingNum, eventid, accountNum);
+            }
+        }
+        catch (UserException ex)
+        {
+            UserException myClass = new UserException();
+            await myClass.ShowAlert("Error", ex.Message, "OK");
+        }
+    }
+
+    public void BackToEvents()
+    {
+        navigationManager.NavigateTo("Event");
+    }
+}
